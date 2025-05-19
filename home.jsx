@@ -26,6 +26,15 @@ export default function Home() {
           <p>
             <strong>Tipo:</strong> {userData.tipo}
           </p>
+          <p>
+            <strong>Dirección:</strong> {userData.direccion}
+          </p>
+          <p>
+            <strong>Comuna:</strong> {userData.comuna}
+          </p>
+          <p>
+            <strong>Teléfono:</strong> {userData.telefono}
+          </p>
         </div>
       )}
       <CerrarSesion />

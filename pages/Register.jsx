@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { auth } from "../services/firebase";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -9,15 +9,42 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nombre, setNombre] = useState("");
-  const [tipo, setTipo] = useState("cliente");
+  const [direccion, setDireccion] = useState("");
+  const [comuna, setComuna] = useState("");
+  const [telefono, setTelefono] = useState("");
   const navigate = useNavigate();
+
+  // Validación de contraseña robusta
+  const isPasswordStrong = (pwd) => {
+    return pwd.length >= 6 && /[a-zA-Z]/.test(pwd) && /\d/.test(pwd);
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!isPasswordStrong(password)) {
+      Swal.fire(
+        "Contraseña débil",
+        "La contraseña debe tener al menos 6 caracteres y combinar letras y números.",
+        "warning"
+      );
+      return;
+    }
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await saveUserData(cred.user.uid, { nombre, tipo, email });
-      Swal.fire("Registrado", "Usuario creado correctamente", "success");
+      await saveUserData(cred.user.uid, {
+        nombre,
+        direccion,
+        comuna,
+        telefono,
+        email,
+        tipo: "cliente",
+      });
+      await sendEmailVerification(cred.user);
+      Swal.fire(
+        "Registro exitoso",
+        "Usuario creado correctamente. Por favor, revisa tu correo y verifica tu cuenta antes de iniciar sesión.",
+        "success"
+      );
       navigate("/login");
     } catch (error) {
       Swal.fire("Error", "No se pudo registrar", "error");
@@ -26,7 +53,7 @@ export default function Register() {
 
   return (
     <div className="container mt-5">
-      <h2>Registro</h2>
+      <h2>Registro Cliente</h2>
       <form onSubmit={handleRegister}>
         <div className="mb-3">
           <label className="form-label">Nombre completo</label>
@@ -57,18 +84,48 @@ export default function Register() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <div className="form-text">
+            Mínimo 6 caracteres, combina letras y números.
+          </div>
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Dirección</label>
+          <input
+            type="text"
+            className="form-control"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Comuna</label>
+          <input
+            type="text"
+            className="form-control"
+            value={comuna}
+            onChange={(e) => setComuna(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Teléfono (opcional)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+          />
         </div>
         <div className="mb-3">
           <label className="form-label">Tipo de usuario</label>
-          <select
-            className="form-select"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            <option value="cliente">Cliente</option>
-            <option value="empresa">Empresa</option>
-            <option value="admin">Administrador</option>
-          </select>
+          <input
+            type="text"
+            className="form-control"
+            value="cliente"
+            disabled
+            readOnly
+          />
         </div>
         <button type="submit" className="btn btn-success">
           Registrar

@@ -23,11 +23,18 @@ export const getUserData = async (uid) => {
 /**
  * Guarda los datos del usuario al momento de registrarse
  * @param {string} uid
- * @param {object} data - {nombre, tipo, email}
+ * @param {object} data - {nombre, direccion, comuna, telefono, email, tipo}
  */
 export const saveUserData = async (uid, data) => {
   try {
-    await setDoc(doc(db, "usuarios", uid), data);
+    await setDoc(doc(db, "usuarios", uid), {
+      nombre: data.nombre,
+      direccion: data.direccion,
+      comuna: data.comuna,
+      telefono: data.telefono || "",
+      email: data.email,
+      tipo: data.tipo,
+    });
   } catch (error) {
     console.error("Error al guardar usuario:", error);
     throw error;

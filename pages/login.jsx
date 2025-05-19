@@ -19,8 +19,15 @@ export default function Login() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const cred = await signInWithEmailAndPassword(auth, email, password);
+      if (!cred.user.emailVerified) {
+        Swal.fire(
+          "Verifica tu correo",
+          "Debes verificar tu correo electrónico antes de iniciar sesión.",
+          "warning"
+        );
+        return;
+      }
       const datos = await getUserData(cred.user.uid);
-      console.log("Bienvenido", datos.nombre, "Tipo:", datos.tipo);
       Swal.fire("Bienvenido", `Hola ${datos.nombre} (${datos.tipo})`, "success");
       navigate("/home");
     } catch (error) {
@@ -56,6 +63,12 @@ export default function Login() {
           Iniciar Sesión
         </button>
       </form>
+      <div className="mt-3">
+        <a href="/recuperar">¿Olvidaste tu contraseña?</a>
+      </div>
+      <div className="mt-2">
+        ¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>
+      </div>
     </div>
   );
 }
